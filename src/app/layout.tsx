@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+//import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import DesktopNavbar from "@/components/DesktopNavbar";
+import { ToastContainer } from "@/components/ui/Toast";
+<ToastContainer />
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
