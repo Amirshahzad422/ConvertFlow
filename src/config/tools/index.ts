@@ -1,14 +1,7 @@
 import type { ToolConfig } from "./types";
+import { webpPngConfig } from "./webp-png";
 
-/**
- * Central registry of every tool on the platform.
- * Each tool is defined by one ToolConfig object here.
- * The generic [slug]/page.tsx template reads from this registry
- * to render every tool page — no manual page code needed per tool.
- *
- * TODO: populate this with real ToolConfig entries as tools are migrated.
- */
-export const tools: ToolConfig[] = [];
+export const tools: ToolConfig[] = [webpPngConfig];
 
 export function getToolBySlug(slug: string): ToolConfig | undefined {
   return tools.find((tool) => tool.slug === slug);
