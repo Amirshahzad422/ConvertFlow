@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import DesktopNavbar from "@/components/DesktopNavbar";
+import Header from "@/components/Header";
 import { ToastContainer } from "@/components/ui/Toast";
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,18 +19,18 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Toolbox — Convert & Compress",
-    template: "%s — Toolbox",
+    default: "ConvertFlow — Convert & Compress Files",
+    template: "%s — ConvertFlow",
   },
   description: "Free tools to convert between formats and compress files: images, documents, video, and audio.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Toolbox — Convert & Compress",
+    title: "ConvertFlow — Convert & Compress Files",
     description: "Free tools to convert between formats and compress files: images, documents, video, and audio.",
     url: siteUrl,
-    siteName: "Toolbox",
+    siteName: "ConvertFlow",
     locale: "en_US",
     type: "website",
   },
@@ -61,10 +56,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white min-h-screen flex flex-col`}
         suppressHydrationWarning={true}
       >
-        {/* Mobile Navbar */}
-        <Navbar />
-        {/* Desktop Navbar */}
-        <DesktopNavbar />
+        <Header />
         <main className="flex-1 w-full px-4 sm:px-6 lg:px-8">
           {children}
         </main>

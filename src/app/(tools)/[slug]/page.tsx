@@ -4,17 +4,25 @@ import type { Metadata } from "next";
 import { tools, getToolBySlug } from "@/config/tools";
 import { FaqAccordion } from "@/components/tools/FaqAccordion";
 import { ToolConverterPanel } from "@/components/tools/ToolConverterPanel";
+import { toolJsonLd } from "@/lib/utils/jsonLd";
+import { toolHref } from "@/components/tools/ToolCard";
 
 interface ToolPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export function generateStaticParams() {
-  return tools.map((tool) => ({ slug: tool.slug }));
+  // customPage tools render through their own bespoke route instead of
+  // this generic template, so they're excluded here even though they
+  // stay in the registry for the directory/search/sitemap.
+  return tools.filter((tool) => !tool.customPage).map((tool) => ({ slug: tool.slug }));
 }
 
-export function generateMetadata({ params }: ToolPageProps): Metadata {
-  const tool = getToolBySlug(params.slug);
+export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const tool = getToolBySlug(slug);
   if (!tool) return {};
 
   return {
@@ -29,14 +37,42 @@ export function generateMetadata({ params }: ToolPageProps): Metadata {
   };
 }
 
-export default function ToolPage({ params }: ToolPageProps) {
-  const tool = getToolBySlug(params.slug);
+export default async function ToolPage({ params }: ToolPageProps) {
+  const { slug } = await params;
+  const tool = getToolBySlug(slug);
   if (!tool) notFound();
 
   const related = tools.filter((t) => tool.relatedTools.includes(t.slug));
+  const faq = [
+    ...tool.faq,
+    {
+      question: `Are my files private when I use ${tool.name}?`,
+      answer: `Yes. ConvertFlow processes compatible files in your browser whenever possible. When server processing is required, files are handled only for the conversion and are not shared.`,
+    },
+    {
+      question: `Can I use ${tool.name} on a phone or tablet?`,
+      answer: `Yes. The upload, conversion, and download flow is designed for modern mobile and desktop browsers.`,
+    },
+    {
+      question: `Do I need an account to use ${tool.name}?`,
+      answer: `No. Everyday conversions can be completed without registration or a watermark.`,
+    },
+    {
+      question: `Can I process several files with ${tool.name}?`,
+      answer: `Yes. Add up to 20 compatible files and follow each file's status in the shared conversion queue.`,
+    },
+  ].slice(0, Math.max(5, tool.faq.length));
+  const jsonLd = toolJsonLd({ ...tool, faq }, siteUrl);
 
   return (
     <div className="min-h-screen bg-white">
+      {jsonLd.map((schema, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
         <div className="text-center mb-10">
@@ -47,7 +83,7 @@ export default function ToolPage({ params }: ToolPageProps) {
         </div>
 
         {/* Upload / convert panel */}
-        <ToolConverterPanel toolName={tool.name} converterFn={tool.converterFn} />
+        <ToolConverterPanel toolName={tool.name} converterFn={tool.converterFn} batchMode={tool.batchMode} />
 
         {/* How-to steps */}
         {tool.howToSteps.length > 0 && (
@@ -70,7 +106,7 @@ export default function ToolPage({ params }: ToolPageProps) {
         {tool.faq.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-[#1A2B4C] mb-4">Frequently asked questions</h2>
-            <FaqAccordion items={tool.faq} />
+            <FaqAccordion items={faq} />
           </div>
         )}
 
@@ -82,7 +118,7 @@ export default function ToolPage({ params }: ToolPageProps) {
               {related.map((rt) => (
                 <Link
                   key={rt.slug}
-                  href={`/${rt.slug}`}
+                  href={toolHref(rt)}
                   className="rounded-lg border border-gray-200 p-4 text-sm font-medium text-[#1A2B4C] hover:border-[#00B4D8] transition-colors"
                 >
                   {rt.name}

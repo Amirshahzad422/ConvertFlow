@@ -58,6 +58,7 @@ export default function VideoJoinerClient() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const activeVideoFile = currentlyPlaying ? videoFiles.find((video) => video.id === currentlyPlaying) : undefined;
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -574,10 +575,10 @@ export default function VideoJoinerClient() {
           <div className="flex-1 bg-gray-800 p-6">
             <div className="h-full bg-black rounded-lg flex items-center justify-center relative">
               <div className="w-full h-full flex items-center justify-center">
-                {currentlyPlaying ? (
+                {activeVideoFile ? (
                   <video
                     key={currentlyPlaying}
-                    src={URL.createObjectURL(videoFiles.find(f => f.id === currentlyPlaying)?.file!)}
+                    src={URL.createObjectURL(activeVideoFile.file)}
                     className="max-w-full max-h-full object-contain"
                     controls
                     autoPlay

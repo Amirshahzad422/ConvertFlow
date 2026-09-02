@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { useFileUpload, FileUploadOptions } from '@/hooks/useFileUpload';
 import { ChevronDownIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { AiOutlineFileAdd } from "react-icons/ai";
@@ -333,8 +334,8 @@ export default function FileUpload({
 
         {showHelp && (
           <>
-            <p className="mt-4 text-sm text-gray-600">Max file size 1GB. <a href="/login" className="underline text-[#080c2a] hover:text-[#080c2a]/90">Login</a> for more</p>
-            <p className="mt-1 text-xs text-gray-500">By proceeding, you agree to our <a href="/terms" className="underline text-gray-600 hover:text-gray-700">Terms of Use</a>.</p>
+            <p className="mt-4 text-sm text-gray-600">Max file size 1GB. <Link href="/login" className="underline text-[#080c2a] hover:text-[#080c2a]/90">Login</Link> for more</p>
+            <p className="mt-1 text-xs text-gray-500">By proceeding, you agree to our <Link href="/terms" className="underline text-gray-600 hover:text-gray-700">Terms of Use</Link>.</p>
           </>
         )}
       </Wrapper>

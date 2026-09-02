@@ -5,6 +5,7 @@ export const webpPngConfig: ToolConfig = {
   name: "WEBP to PNG Converter",
   description: "Convert WEBP images to PNG format with high quality and transparency support.",
   category: "image",
+  operation: "convert",
   fromFormat: "WEBP",
   toFormat: "PNG",
   howToSteps: [
@@ -32,4 +33,7 @@ export const webpPngConfig: ToolConfig = {
   metaTitle: "WEBP to PNG Converter — Free Online Tool",
   metaDescription:
     "Convert WEBP images to PNG format online for free, with full quality and transparency support.",
+  icon: "🖼️",
+  popular: true,
+  legacyPaths: ["/convert/webp-png"],
 };

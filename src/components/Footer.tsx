@@ -1,98 +1,27 @@
 import Link from 'next/link';
+import { ArrowRightLeft, Github, Heart, ShieldCheck } from 'lucide-react';
+
+const columns = [
+  { title: 'Convert', links: [['Image Converter', '/convert/image-converter'], ['Video to MP3', '/convert/video-mp3'], ['PDF to Images', '/convert/pdf-to-images'], ['Audio Converter', '/convert/audio-converter']] },
+  { title: 'Compress', links: [['Image Compressor', '/compress/image-compressor'], ['Video Compressor', '/compress/video-compressor'], ['PDF Compressor', '/compress/pdf-compressor'], ['GIF Compressor', '/compress/gif-compressor']] },
+  { title: 'Resources', links: [['All Tools', '/tools'], ['API', '/api'], ['Pricing', '/pricing'], ['Terms of Use', '/terms']] },
+];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-[#080c2a]">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-4 lg:gap-6 items-start">
-          {/* Company Info (hidden on mobile to keep 3 inline columns) */}
-          <div className="hidden sm:block space-y-3 sm:space-y-4 sm:col-span-1">
-            <div>
-              <Link href="/" className="font-bold text-lg sm:text-xl text-white hover:text-gray-300 transition-colors">
-                Toolbox
-              </Link>
-              <p className="text-sm text-gray-300 mt-2">
-                Free online tools for converting and compressing files. 
-                Professional quality, completely secure, and no signup required.
-              </p>
-            </div>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <span className="sr-only">GitHub</span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <span className="sr-only">LinkedIn</span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clipRule="evenodd" />
-                </svg>
-              </a>
-            </div>
+    <footer className="border-t border-slate-800 bg-slate-950 text-slate-300">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-[1.4fr_2fr]">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-white"><span className="grid size-9 place-items-center rounded-xl bg-indigo-600"><ArrowRightLeft className="size-5" /></span><span>Convert<span className="text-indigo-400">Flow</span></span></Link>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">Fast, private, easy-to-use tools for the files you work with every day.</p>
+            <div className="mt-5 flex items-center gap-4"><span className="inline-flex items-center gap-1.5 text-xs text-slate-500"><ShieldCheck className="size-4 text-emerald-400" /> Privacy-first</span><a href="https://github.com/verxeon-ai/ConvertFlow" aria-label="ConvertFlow on GitHub" className="text-slate-500 transition hover:text-white"><Github className="size-5" /></a></div>
           </div>
-
-          {/* Tools */}
-          <div className="space-y-1.5 sm:space-y-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wide">Tools</h3>
-            <ul className="grid grid-cols-1 gap-0.5 sm:space-y-1.5 text-[11px] sm:text-sm">
-              <li><Link href="/convert" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Convert Files</Link></li>
-              <li><Link href="/compress" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Compress Files</Link></li>
-              <li><Link href="/convert/image-converter" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Image Converter</Link></li>
-              <li><Link href="/convert/video-mp3" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Video to MP3</Link></li>
-              <li><Link href="/convert/pdf-to-images" className="block py-0.5 text-gray-300 hover:text-white transition-colors">PDF to Images</Link></li>
-              <li><Link href="/compress/image-compressor" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Image Compressor</Link></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div className="space-y-1.5 sm:space-y-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wide">Company</h3>
-            <ul className="grid grid-cols-1 gap-0.5 sm:space-y-1.5 text-[11px] sm:text-sm">
-              <li><Link href="/about" className="block py-0.5 text-gray-300 hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Contact</Link></li>
-              <li><Link href="/blog" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/careers" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/press" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Press</Link></li>
-              <li><Link href="/partners" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Partners</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="space-y-1.5 sm:space-y-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wide">Legal</h3>
-            <ul className="grid grid-cols-1 gap-0.5 sm:space-y-1.5 text-[11px] sm:text-sm">
-              <li><Link href="/privacy-policy" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms-of-service" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/cookie-policy" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Cookie Policy</Link></li>
-              <li><Link href="/dmca" className="block py-0.5 text-gray-300 hover:text-white transition-colors">DMCA</Link></li>
-              <li><Link href="/gdpr" className="block py-0.5 text-gray-300 hover:text-white transition-colors">GDPR</Link></li>
-              <li><Link href="/accessibility" className="block py-0.5 text-gray-300 hover:text-white transition-colors">Accessibility</Link></li>
-            </ul>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {columns.map((column) => <div key={column.title}><h3 className="text-sm font-bold text-white">{column.title}</h3><ul className="mt-4 space-y-3">{column.links.map(([label, href]) => <li key={href}><Link href={href} className="text-sm text-slate-400 transition hover:text-white">{label}</Link></li>)}</ul></div>)}
           </div>
         </div>
-
-        {/* Bottom Section */}
-        <div className="mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-gray-700/30">
-          <div className="flex flex-row flex-wrap justify-between items-center gap-3">
-            <div className="text-xs sm:text-sm text-gray-400">
-              © {new Date().getFullYear()} Toolbox. All rights reserved.
-            </div>
-            <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
-              <span>Made with ❤️ for developers</span>
-              <span className="hidden sm:inline">•</span>
-              <span>100% Free & Open Source</span>
-              <span className="hidden sm:inline">•</span>
-              <span>No Registration Required</span>
-            </div>
-          </div>
-        </div>
+        <div className="mt-10 flex flex-col gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} ConvertFlow. All rights reserved.</p><p className="flex items-center gap-1">Made with <Heart className="size-3.5 fill-rose-500 text-rose-500" /> for simpler file conversion.</p></div>
       </div>
     </footer>
   );

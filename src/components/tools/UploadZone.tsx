@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { useDropzone, type Accept } from "react-dropzone";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDropzone, type Accept, type FileRejection } from "react-dropzone";
 import { cn } from "@/lib/utils/cn";
 
 export interface UploadZoneFile {
@@ -31,6 +31,15 @@ export function UploadZone({
 }: UploadZoneProps) {
   const [files, setFiles] = useState<UploadZoneFile[]>([]);
   const [sizeError, setSizeError] = useState<string | null>(null);
+  const filesRef = useRef<UploadZoneFile[]>([]);
+
+  useEffect(() => {
+    filesRef.current = files;
+  }, [files]);
+
+  useEffect(() => () => {
+    filesRef.current.forEach((item) => item.previewUrl && URL.revokeObjectURL(item.previewUrl));
+  }, []);
 
   const updateFiles = useCallback(
     (next: UploadZoneFile[]) => {
@@ -81,8 +90,13 @@ export function UploadZone({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: (rejections: FileRejection[]) => {
+      const tooLarge = rejections.some((item) => item.errors.some((error) => error.code === "file-too-large"));
+      setSizeError(tooLarge ? `One or more files exceed the ${maxSizeMB}MB limit.` : "One or more files use an unsupported format.");
+    },
     accept,
     maxFiles,
+    maxSize: maxSizeMB * 1024 * 1024,
     disabled: files.length >= maxFiles,
   });
 

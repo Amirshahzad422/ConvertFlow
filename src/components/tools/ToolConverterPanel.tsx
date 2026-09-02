@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import JSZip from "jszip";
 import { UploadZone, type UploadZoneFile } from "@/components/tools/UploadZone";
 import { FileStatusList, type FileStatusItem } from "@/components/tools/FileStatusList";
 import { Button } from "@/components/ui/Button";
 import { useToastStore } from "@/store/toastStore";
-import { converterRegistry } from "@/lib/converters/client/registry";
+import { batchConverterRegistry, converterRegistry } from "@/lib/converters/client/registry";
+import { ProgressBar } from "@/components/tools/ProgressBar";
+import { Download, RotateCcw } from "lucide-react";
+import { useConversionStore } from "@/store/conversionStore";
 
 interface ToolConverterPanelProps {
   toolName: string;
   converterFn: string;
+  batchMode?: boolean;
 }
 
 interface ResultFile {
@@ -18,11 +23,20 @@ interface ResultFile {
   filename: string;
 }
 
-export function ToolConverterPanel({ toolName, converterFn }: ToolConverterPanelProps) {
+export function ToolConverterPanel({ toolName, converterFn, batchMode = false }: ToolConverterPanelProps) {
   const [uploaded, setUploaded] = useState<UploadZoneFile[]>([]);
   const [statusFiles, setStatusFiles] = useState<FileStatusItem[]>([]);
   const [results, setResults] = useState<ResultFile[]>([]);
   const addToast = useToastStore((s) => s.addToast);
+  const addHistoryEntry = useConversionStore((s) => s.addHistoryEntry);
+  const [isConverting, setIsConverting] = useState(false);
+  const [uploadSession, setUploadSession] = useState(0);
+  const cancelledIds = useRef(new Set<string>());
+
+  const overallProgress = useMemo(() => {
+    if (!statusFiles.length) return 0;
+    return statusFiles.reduce((sum, file) => sum + file.progress, 0) / statusFiles.length;
+  }, [statusFiles]);
 
   async function handleConvert() {
     if (uploaded.length === 0) {
@@ -31,8 +45,14 @@ export function ToolConverterPanel({ toolName, converterFn }: ToolConverterPanel
     }
 
     const converter = converterRegistry[converterFn];
-    if (!converter) {
+    const batchConverter = batchConverterRegistry[converterFn];
+    if ((!batchMode && !converter) || (batchMode && !batchConverter)) {
       addToast(`No converter wired up yet for "${converterFn}".`, "error");
+      return;
+    }
+
+    if (batchMode && uploaded.length < 2) {
+      addToast("Add at least two files for this tool.", "error");
       return;
     }
 
@@ -45,21 +65,69 @@ export function ToolConverterPanel({ toolName, converterFn }: ToolConverterPanel
     }));
     setStatusFiles(initial);
     setResults([]);
+    setIsConverting(true);
+    cancelledIds.current.clear();
+
+    if (batchMode && batchConverter) {
+      try {
+        const result = await batchConverter(uploaded.map((item) => item.file));
+        setResults([{ id: crypto.randomUUID(), ...result }]);
+        setStatusFiles((prev) => prev.map((file) => ({ ...file, status: "done", progress: 100 })));
+        addHistoryEntry({ toolSlug: converterFn, filename: result.filename, size: result.blob.size });
+      } catch (error) {
+        setStatusFiles((prev) => prev.map((file) => ({ ...file, status: "error", progress: 0 })));
+        addToast(error instanceof Error ? error.message : "Conversion failed.", "error");
+      } finally {
+        setIsConverting(false);
+      }
+      return;
+    }
 
     for (const item of uploaded) {
-      try {
-        const { blob, filename } = await converter(item.file);
-        setResults((prev) => [...prev, { id: item.id, blob, filename }]);
-        setStatusFiles((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: "done", progress: 100 } : f))
-        );
-      } catch (err) {
-        setStatusFiles((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: "error", progress: 0 } : f))
-        );
-        addToast(`Failed to convert ${item.file.name}`, "error");
-      }
+      await processItem(item, converter);
     }
+    setIsConverting(false);
+  }
+
+  async function processItem(item: UploadZoneFile, converter = converterRegistry[converterFn]) {
+    if (!converter) return;
+    cancelledIds.current.delete(item.id);
+    setStatusFiles((prev) => prev.map((file) => file.id === item.id ? { ...file, status: "processing", progress: 10 } : file));
+    try {
+      const { blob, filename } = await converter(item.file);
+      if (cancelledIds.current.has(item.id)) return;
+      setResults((prev) => [...prev.filter((result) => result.id !== item.id), { id: item.id, blob, filename }]);
+      addHistoryEntry({ toolSlug: converterFn, filename, size: blob.size });
+      setStatusFiles((prev) => prev.map((file) => file.id === item.id ? { ...file, status: "done", progress: 100 } : file));
+    } catch {
+      if (cancelledIds.current.has(item.id)) return;
+      setStatusFiles((prev) => prev.map((file) => file.id === item.id ? { ...file, status: "error", progress: 0 } : file));
+      addToast(`Failed to convert ${item.file.name}`, "error");
+    }
+  }
+
+  function cancel(id: string) {
+    cancelledIds.current.add(id);
+    setStatusFiles((prev) => prev.filter((file) => file.id !== id));
+  }
+
+  function retry(id: string) {
+    const item = uploaded.find((file) => file.id === id);
+    if (item) void processItem(item);
+  }
+
+  async function handleDownloadAll() {
+    const zip = new JSZip();
+    results.forEach((result) => zip.file(result.filename, result.blob));
+    const blob = await zip.generateAsync({ type: "blob" });
+    handleDownload({ id: "all", blob, filename: "convertflow-results.zip" });
+  }
+
+  function reset() {
+    setUploaded([]);
+    setStatusFiles([]);
+    setResults([]);
+    setUploadSession((value) => value + 1);
   }
 
   function handleDownload(result: ResultFile) {
@@ -75,35 +143,47 @@ export function ToolConverterPanel({ toolName, converterFn }: ToolConverterPanel
 
   return (
     <div className="flex flex-col gap-4">
-      <UploadZone maxFiles={20} maxSizeMB={100} onFilesChange={setUploaded} />
+      <UploadZone key={uploadSession} maxFiles={20} maxSizeMB={100} onFilesChange={setUploaded} />
 
-      <Button onClick={handleConvert} disabled={uploaded.length === 0}>
-        Convert to {toolName}
+      <Button onClick={handleConvert} disabled={uploaded.length === 0 || isConverting}>
+        {isConverting ? "Processing…" : toolName}
       </Button>
+
+      {statusFiles.length > 1 && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-600">
+            <span>Overall progress</span><span>{Math.round(overallProgress)}%</span>
+          </div>
+          <ProgressBar value={overallProgress} size="sm" />
+        </div>
+      )}
 
       {statusFiles.length > 0 && (
         <FileStatusList
           files={statusFiles}
-          onCancel={(id) => setStatusFiles((prev) => prev.filter((f) => f.id !== id))}
-          onRetry={(id) =>
-            setStatusFiles((prev) =>
-              prev.map((f) => (f.id === id ? { ...f, status: "processing", progress: 0 } : f))
-            )
-          }
+          onCancel={cancel}
+          onRetry={retry}
         />
       )}
 
       {results.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+          <div className="flex flex-col gap-2">
           {results.map((r) => (
             <button
               key={r.id}
               onClick={() => handleDownload(r)}
-              className="text-left text-sm font-medium text-[#00B4D8] hover:underline"
+              className="flex items-center gap-2 text-left text-sm font-bold text-emerald-700 hover:underline"
             >
-              Download {r.filename}
+              <Download className="size-4" /> Download {r.filename}
             </button>
           ))}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-emerald-200 pt-4">
+            {results.length > 1 && <Button onClick={handleDownloadAll}>Download all as ZIP</Button>}
+            <button onClick={reset} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-slate-600 hover:bg-white"><RotateCcw className="size-4" /> Convert more</button>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">Browser results stay on this device. Temporary server files are deleted after one hour.</p>
         </div>
       )}
     </div>
