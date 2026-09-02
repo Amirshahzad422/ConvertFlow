@@ -38,6 +38,6 @@ export const imageCompressorConfig: ToolConfig = {
   metaDescription:
     "Compress JPG, PNG, and WEBP images online for free, entirely in your browser, with adjustable quality and resizing.",
   icon: "🗜️",
-  customPage: true,
-  route: "/compress/image-compressor",
+  customPanel: "image-compressor",
+  legacyPaths: ["/compress/image-compressor"],
 };

@@ -43,6 +43,6 @@ export const imageRotateConfig: ToolConfig = {
     "Rotate or straighten any image online for free — 90° rotation buttons plus a precise -45° to 45° straighten slider. Fast and runs in your browser.",
   icon: "🔄",
   popular: false,
-  customPage: true,
-  route: "/tools/image-rotate",
+  customPanel: "image-rotate",
+  legacyPaths: ["/tools/image-rotate"],
 };

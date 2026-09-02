@@ -35,6 +35,8 @@ Standard tools support drag-and-drop, up to 20 files, per-file validation and re
 
 The route, metadata, SoftwareApplication and FAQ JSON-LD, sitemap entry, directory card, search result, how-to content, FAQ, and related-tool section are then generated automatically. Set `batchMode: true` and register a function in `batchConverterRegistry` when the converter consumes the entire queue, such as Merge PDF.
 
+For an interactive tool (cropper, color picker, calculator, timeline editor) that isn't a drop-in file converter, skip the converter function: add a `*Panel.tsx` component under `src/components/tools/panels/`, register it in `panels/CustomToolPanel.tsx`, and set `customPanel: "<key>"` on the config. The same `[slug]` template still renders the hero, how-to, FAQ, related tools, JSON-LD and metadata around it — every tool lives at `/<slug>` and there is no per-tool page code.
+
 ## Deployment
 
 The Next.js frontend and lightweight API routes can be deployed to Vercel. Copy the FFmpeg assets in `public/ffmpeg/` unchanged; the cross-origin isolation headers in `next.config.ts` are required for SharedArrayBuffer and FFmpeg.wasm.

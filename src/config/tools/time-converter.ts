@@ -44,6 +44,6 @@ export const timeConverterConfig: ToolConfig = {
     "Convert between nanoseconds, seconds, minutes, hours, days, years, and special units like sidereal time and lunar months. Free online time converter.",
   icon: "⏱️",
   popular: false,
-  customPage: true,
-  route: "/convert/time-converter",
+  customPanel: "time-converter",
+  legacyPaths: ["/convert/time-converter"],
 };

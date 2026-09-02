@@ -42,6 +42,6 @@ export const imageCropperConfig: ToolConfig = {
     "Crop any image online for free with a draggable crop box, aspect ratio presets, and precise controls. Fast, private, and runs in your browser.",
   icon: "✂️",
   popular: false,
-  customPage: true,
-  route: "/tools/image-cropper",
+  customPanel: "image-cropper",
+  legacyPaths: ["/tools/image-cropper"],
 };

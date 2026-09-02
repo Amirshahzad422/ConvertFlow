@@ -41,6 +41,6 @@ export const imageConverterConfig: ToolConfig = {
     "Convert images between JPG, PNG, WEBP, and SVG formats online for free with customizable quality settings.",
   icon: "🔄",
   popular: true,
-  customPage: true,
-  route: "/convert/image-converter",
+  customPanel: "image-converter",
+  legacyPaths: ["/convert/image-converter"],
 };

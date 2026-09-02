@@ -44,6 +44,6 @@ export const ageCalculatorConfig: ToolConfig = {
     "Calculate your exact age in days, weeks, months, years, decades, and centuries. Free online age calculator with next-birthday countdown.",
   icon: "🎂",
   popular: false,
-  customPage: true,
-  route: "/convert/age-calculator",
+  customPanel: "age-calculator",
+  legacyPaths: ["/convert/age-calculator"],
 };

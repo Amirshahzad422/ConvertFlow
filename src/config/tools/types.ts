@@ -32,19 +32,16 @@ export interface ToolConfig {
   icon?: string;               // emoji, shown on ToolCard
   popular?: boolean;           // surfaced on directory/homepage "popular" grids
   /**
-   * True when this tool has its own bespoke route (e.g. a calculator or a
-   * multi-file timeline editor) instead of rendering through the generic
-   * src/app/(tools)/[slug]/page.tsx template. It still appears in the
-   * registry (directory, search, sitemap) via its own route.
+   * For tools whose experience is an interactive editor/calculator rather than
+   * a drop-in file converter (cropper, color picker, calculators, timeline
+   * editors). Set to a key registered in
+   * src/components/tools/panels/registry.ts. The tool still renders through the
+   * single src/app/(tools)/[slug]/page.tsx template — hero, how-to, FAQ,
+   * related tools, JSON-LD and metadata are all generated the same way — only
+   * the conversion panel is swapped for the named component. When set,
+   * `converterFn` is ignored and may be "".
    */
-  customPage?: boolean;
-  /**
-   * Only meaningful when customPage is true: the tool's real route, since
-   * it doesn't live at the canonical /<slug> path (e.g. "/tools/color-picker").
-   * Every link into the tool (ToolCard, SearchBar, directories) resolves
-   * through this when present.
-   */
-  route?: string;
-  /** Old /convert|/compress|/tools URLs that should 301 to /<slug>. Do not set this for customPage tools whose route hasn't moved. */
+  customPanel?: string;
+  /** Old /convert|/compress|/tools URLs that should 301 to /<slug>. */
   legacyPaths?: string[];
 }

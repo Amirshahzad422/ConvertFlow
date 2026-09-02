@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { ArrowRightLeft, ChevronDown, Menu, Search, X } from 'lucide-react';
 
 const navGroups = [
-  { label: 'Convert', href: '/convert', links: [['Image Converter', '/convert/image-converter'], ['Video Converter', '/convert/mp4-converter'], ['Audio Converter', '/convert/audio-converter'], ['PDF to Images', '/convert/pdf-to-images'], ['Archive Converter', '/convert/archive-converter']] },
-  { label: 'Compress', href: '/compress', links: [['Image Compressor', '/compress/image-compressor'], ['Video Compressor', '/compress/video-compressor'], ['PDF Compressor', '/compress/pdf-compressor'], ['GIF Compressor', '/compress/gif-compressor']] },
-  { label: 'Tools', href: '/tools', links: [['Image Cropper', '/tools/image-cropper'], ['Rotate Image', '/tools/image-rotate'], ['Audio Trimmer', '/tools/audio-trimmer'], ['Audio Joiner', '/tools/audio-joiner'], ['Video Joiner', '/tools/video-joiner'], ['Color Picker', '/tools/color-picker']] },
+  { label: 'Convert', href: '/convert', links: [['Image Converter', '/image-converter'], ['Video Converter', '/mp4-converter'], ['Audio Converter', '/audio-converter'], ['PDF to Images', '/pdf-to-images'], ['Archive Converter', '/archive-converter']] },
+  { label: 'Compress', href: '/compress', links: [['Image Compressor', '/image-compressor'], ['Video Compressor', '/video-compressor'], ['PDF Compressor', '/pdf-compressor'], ['GIF Compressor', '/gif-compressor']] },
+  { label: 'Tools', href: '/tools', links: [['Image Cropper', '/image-cropper'], ['Rotate Image', '/image-rotate'], ['Audio Trimmer', '/audio-trimmer'], ['Audio Joiner', '/audio-joiner'], ['Video Joiner', '/video-joiner'], ['Color Picker', '/color-picker']] },
 ];
 
 export default function Header() {

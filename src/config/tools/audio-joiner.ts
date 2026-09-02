@@ -48,6 +48,6 @@ export const audioJoinerConfig: ToolConfig = {
     "Merge multiple audio or video files into one MP3 online for free, with drag-to-reorder, per-file trimming, and volume control.",
   icon: "🔊",
   popular: false,
-  customPage: true,
-  route: "/tools/audio-joiner",
+  customPanel: "audio-joiner",
+  legacyPaths: ["/tools/audio-joiner"],
 };

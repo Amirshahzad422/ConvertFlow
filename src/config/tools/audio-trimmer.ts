@@ -43,6 +43,6 @@ export const audioTrimmerConfig: ToolConfig = {
     "Trim or cut audio files online for free with precise start/end or middle-removal trimming. Export to MP3, WAV, AAC, OGG, or FLAC.",
   icon: "✂️",
   popular: false,
-  customPage: true,
-  route: "/tools/audio-trimmer",
+  customPanel: "audio-trimmer",
+  legacyPaths: ["/tools/audio-trimmer"],
 };

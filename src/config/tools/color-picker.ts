@@ -43,6 +43,6 @@ export const colorPickerConfig: ToolConfig = {
     "Free online color picker with HEX, RGB, HSV, HSL, and CMYK support, plus an image color picker with magnifier and dominant palette extraction.",
   icon: "🎨",
   popular: false,
-  customPage: true,
-  route: "/tools/color-picker",
+  customPanel: "color-picker",
+  legacyPaths: ["/tools/color-picker"],
 };

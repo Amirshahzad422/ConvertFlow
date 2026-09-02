@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ToolConfig } from "@/config/tools/types";
 
 export function toolHref(tool: ToolConfig): string {
-  return tool.route ?? `/${tool.slug}`;
+  return `/${tool.slug}`;
 }
 
 interface ToolCardProps {

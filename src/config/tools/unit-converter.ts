@@ -44,6 +44,6 @@ export const unitConverterConfig: ToolConfig = {
     "Convert between length, weight, temperature, area, volume, speed, and pressure units online for free. Fast, accurate unit conversion with 50+ units.",
   icon: "📐",
   popular: false,
-  customPage: true,
-  route: "/convert/unit-converter",
+  customPanel: "unit-converter",
+  legacyPaths: ["/convert/unit-converter"],
 };

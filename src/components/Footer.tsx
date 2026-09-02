@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { ArrowRightLeft, Github, Heart, ShieldCheck } from 'lucide-react';
 
 const columns = [
-  { title: 'Convert', links: [['Image Converter', '/convert/image-converter'], ['Video to MP3', '/convert/video-mp3'], ['PDF to Images', '/convert/pdf-to-images'], ['Audio Converter', '/convert/audio-converter']] },
-  { title: 'Compress', links: [['Image Compressor', '/compress/image-compressor'], ['Video Compressor', '/compress/video-compressor'], ['PDF Compressor', '/compress/pdf-compressor'], ['GIF Compressor', '/compress/gif-compressor']] },
+  { title: 'Convert', links: [['Image Converter', '/image-converter'], ['Video to MP3', '/video-mp3'], ['PDF to Images', '/pdf-to-images'], ['Audio Converter', '/audio-converter']] },
+  { title: 'Compress', links: [['Image Compressor', '/image-compressor'], ['Video Compressor', '/video-compressor'], ['PDF Compressor', '/pdf-compressor'], ['GIF Compressor', '/gif-compressor']] },
   { title: 'Resources', links: [['All Tools', '/tools'], ['API', '/api'], ['Pricing', '/pricing'], ['Terms of Use', '/terms']] },
 ];
 

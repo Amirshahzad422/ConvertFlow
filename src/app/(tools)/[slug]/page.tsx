@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { tools, getToolBySlug } from "@/config/tools";
 import { FaqAccordion } from "@/components/tools/FaqAccordion";
 import { ToolConverterPanel } from "@/components/tools/ToolConverterPanel";
+import { CustomToolPanel } from "@/components/tools/panels/CustomToolPanel";
 import { toolJsonLd } from "@/lib/utils/jsonLd";
 import { toolHref } from "@/components/tools/ToolCard";
 
@@ -13,11 +14,13 @@ interface ToolPageProps {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+// Every tool in the registry renders through this single template — the
+// standard ones use ToolConverterPanel, interactive ones swap in a
+// `customPanel` component. Nothing else in the app defines a tool route.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
-  // customPage tools render through their own bespoke route instead of
-  // this generic template, so they're excluded here even though they
-  // stay in the registry for the directory/search/sitemap.
-  return tools.filter((tool) => !tool.customPage).map((tool) => ({ slug: tool.slug }));
+  return tools.map((tool) => ({ slug: tool.slug }));
 }
 
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
@@ -83,7 +86,18 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </div>
 
         {/* Upload / convert panel */}
-        <ToolConverterPanel toolName={tool.name} converterFn={tool.converterFn} batchMode={tool.batchMode} />
+        {tool.customPanel ? (
+          <CustomToolPanel panelKey={tool.customPanel} />
+        ) : (
+          <ToolConverterPanel
+            toolName={tool.name}
+            converterFn={tool.converterFn}
+            batchMode={tool.batchMode}
+            operation={tool.operation}
+            toFormat={tool.toFormat}
+            category={tool.category}
+          />
+        )}
 
         {/* How-to steps */}
         {tool.howToSteps.length > 0 && (

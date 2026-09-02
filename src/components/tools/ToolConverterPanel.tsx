@@ -10,11 +10,53 @@ import { batchConverterRegistry, converterRegistry } from "@/lib/converters/clie
 import { ProgressBar } from "@/components/tools/ProgressBar";
 import { Download, RotateCcw } from "lucide-react";
 import { useConversionStore } from "@/store/conversionStore";
+import { SERVER_FALLBACK_IMAGE_SIZE_BYTES } from "@/lib/converters/client/thresholds";
 
 interface ToolConverterPanelProps {
   toolName: string;
   converterFn: string;
   batchMode?: boolean;
+  operation?: "convert" | "compress" | "tool";
+  toFormat?: string;
+  category?: string;
+}
+
+const SERVER_IMAGE_TARGETS = new Set(["jpg", "jpeg", "png", "webp", "svg"]);
+
+/**
+ * Large images are slow and memory-hungry to convert with Canvas in the
+ * browser, so hand them to the Sharp-powered API route instead. Returns null
+ * when the client converter should handle the file after all.
+ */
+async function convertLargeImageOnServer(
+  file: File,
+  operation: ToolConverterPanelProps["operation"],
+  toFormat?: string,
+): Promise<{ blob: Blob; filename: string } | null> {
+  if (file.size <= SERVER_FALLBACK_IMAGE_SIZE_BYTES) return null;
+  if (!file.type.startsWith("image/")) return null;
+
+  const base = file.name.replace(/\.[^.]+$/, "");
+  const body = new FormData();
+  body.append("file", file);
+
+  if (operation === "compress") {
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    body.append("output", ext);
+    body.append("quality", "80");
+    const res = await fetch("/api/compress/image", { method: "POST", body });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Server compression failed");
+    return { blob: await res.blob(), filename: `${base}-compressed.${ext}` };
+  }
+
+  const target = (toFormat || "png").toLowerCase();
+  if (!SERVER_IMAGE_TARGETS.has(target)) return null;
+  body.append("target", target);
+  body.append("quality", "90");
+  const res = await fetch("/api/convert/image", { method: "POST", body });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Server conversion failed");
+  const ext = target === "jpeg" ? "jpg" : target;
+  return { blob: await res.blob(), filename: `${base}.${ext}` };
 }
 
 interface ResultFile {
@@ -23,7 +65,7 @@ interface ResultFile {
   filename: string;
 }
 
-export function ToolConverterPanel({ toolName, converterFn, batchMode = false }: ToolConverterPanelProps) {
+export function ToolConverterPanel({ toolName, converterFn, batchMode = false, operation, toFormat, category }: ToolConverterPanelProps) {
   const [uploaded, setUploaded] = useState<UploadZoneFile[]>([]);
   const [statusFiles, setStatusFiles] = useState<FileStatusItem[]>([]);
   const [results, setResults] = useState<ResultFile[]>([]);
@@ -94,7 +136,11 @@ export function ToolConverterPanel({ toolName, converterFn, batchMode = false }:
     cancelledIds.current.delete(item.id);
     setStatusFiles((prev) => prev.map((file) => file.id === item.id ? { ...file, status: "processing", progress: 10 } : file));
     try {
-      const { blob, filename } = await converter(item.file);
+      let result: { blob: Blob; filename: string } | null = null;
+      if (category === "image" && (operation === "convert" || operation === "compress")) {
+        result = await convertLargeImageOnServer(item.file, operation, toFormat);
+      }
+      const { blob, filename } = result ?? (await converter(item.file));
       if (cancelledIds.current.has(item.id)) return;
       setResults((prev) => [...prev.filter((result) => result.id !== item.id), { id: item.id, blob, filename }]);
       addHistoryEntry({ toolSlug: converterFn, filename, size: blob.size });

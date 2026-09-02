@@ -43,6 +43,6 @@ export const videoJoinerConfig: ToolConfig = {
     "Merge multiple video files into one MP4 online for free, with drag-to-reorder, per-clip trimming, and volume control.",
   icon: "🎬",
   popular: false,
-  customPage: true,
-  route: "/tools/video-joiner",
+  customPanel: "video-joiner",
+  legacyPaths: ["/tools/video-joiner"],
 };
