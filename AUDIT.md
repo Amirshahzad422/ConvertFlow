@@ -12,7 +12,7 @@ status, and the gap list to reach the spec's Definition of Done for each phase.
 
 | Check | Result |
 | --- | --- |
-| `npm run build` | ✅ Passes (SSG, 127 pages) |
+| `npm run build` | ✅ Passes (SSG, 94 routes/pages after duplicate-route removal) |
 | Lint | ⚠️ ~60 warnings (unused vars, `any`, `require()` in API routes) — no errors |
 | `npm run dev` | ✅ Runs |
 | Dependencies from T1.1 | ✅ All present: `jszip`, `file-saver`, `zustand`, `next-sitemap`, `react-dropzone`, `@tanstack/react-query` |
@@ -35,16 +35,17 @@ status, and the gap list to reach the spec's Definition of Done for each phase.
 | **document** | **0** | ❌ no DOCX/PPTX/XLSX ↔ PDF, no PDF→Word |
 
 ### Tools rendered by the config-driven `[slug]` template (spec-compliant)
-37 tools render through `src/app/(tools)/[slug]/page.tsx` — hero, UploadZone, how-to, FAQ,
-related tools, JSON-LD, generated metadata. This part of the architecture works.
+All 48 tools render through `src/app/(tools)/[slug]/page.tsx` — hero, upload/editor panel,
+how-to, FAQ, related tools, JSON-LD, and generated metadata. Eleven interactive tools select
+a registered custom panel from config while keeping the same page template.
 
-### Tools that violate the config-driven requirement (`customPage: true`) — 11
+### Pre-refactor custom-route findings — resolved
 `age-calculator`, `audio-joiner`, `audio-trimmer`, `color-picker`, `image-compressor`,
 `image-converter`, `image-cropper`, `image-rotate`, `time-converter`, `unit-converter`,
 `video-joiner`.
 
-These still live at hand-written routes (`/convert/image-converter`, `/tools/color-picker`, …).
-Problems this creates:
+These previously lived at hand-written routes (`/convert/image-converter`, `/tools/color-picker`, …). The P0 work below moved them into the shared panel registry and canonical route.
+The previous structure created these problems, all resolved by the P0 work below:
 
 1. **Checklist #4 fails** — "every tool page is generated from a single config file, no manual page code."
 2. **Broken duplicate routes** — `/image-converter` (the `[slug]` route) resolves the config,
@@ -53,11 +54,9 @@ Problems this creates:
    all 11 custom tools are listed at their broken canonical path, not their real `route`.
 4. **No JSON-LD / generated metadata** on the 11 bespoke pages.
 
-### Legacy `/convert/*`, `/compress/*`, `/tools/*` page tree
-~50 hand-written tool pages still exist. ~34 configs carry `legacyPaths` and 301 via
-`next.config.ts`, but the source pages are still in the tree and still built. The rest
-(image-converter, image-compressor, etc.) are the live custom pages. This dual structure is
-the single biggest deviation from Section 7.
+### Legacy `/convert/*`, `/compress/*`, `/tools/*` routes
+The duplicate hand-written page tree has been removed. Configured legacy URLs now redirect
+to their canonical `/<slug>` pages through `next.config.ts`.
 
 ---
 
@@ -86,10 +85,10 @@ the single biggest deviation from Section 7.
 ### 3.1 Discovery & directory
 - ✅ Landing page: hero + search, category grid, popular tools, features, testimonials, CTA, footer.
 - ✅ Sticky responsive header with Convert/Compress/Tools dropdowns, search icon, Log in.
-- ⚠️ Header nav points at legacy paths (`/convert/image-converter`) and `/convert/archive-converter` (dead — no such page, no redirect target match).
+- ✅ Header and footer navigation point to canonical tool URLs; configured legacy URLs return permanent redirects.
 - ⚠️ Nav dropdown groups are `Convert / Compress / Tools` — spec asks for `Convert / Compress / Tools / API / Pricing` as category dropdowns; API & Pricing are plain links (acceptable).
 - ✅ Tool directory with per-category grouping + search (`/convert`, `/compress`, `/tools`, `/image-tools`, …).
-- ⚠️ Search: substring match over name/description. No format-alias matching, no autocomplete dropdown (spec marks this "High demand").
+- ✅ Search includes an autocomplete dropdown and matches names, source/target formats, descriptions, and categories.
 - ❌ No dedicated `/document-tools` category page (no document tools).
 
 ### 3.2 Conversion engine
@@ -99,14 +98,14 @@ the single biggest deviation from Section 7.
 - ✅ Sharp server routes for image convert + compress with size limits.
 - ⚠️ Progress: per-file + overall bar, cancel, retry. **Progress is faked** (10% → 100%, no real streaming); no ETA / "estimated time remaining".
 - ✅ Download individual + download-all-as-ZIP (JSZip) + retention notice.
-- ❌ No client→server threshold hand-off in the config-driven panel. `ToolConverterPanel` only ever calls the client registry; large files never route to the Sharp API. (`thresholds.ts` exists but is not used by the generic panel.)
+- ✅ Config-driven image tools hand files above the client threshold to compatible Sharp API routes; unsupported server formats stay on format-preserving converters.
 - ❌ No `api/jobs/` polling, no BullMQ/Redis, no cancel on the server.
 
 ### 3.3 Tool pages & SEO
 - ✅ `[slug]` pages: hero, how-to, FAQ accordion (padded to ≥5), related tools, JSON-LD (SoftwareApplication + FAQPage), generated title/description.
-- ❌ 11 custom tools have none of the above.
-- ⚠️ `sitemap.ts` is hand-rolled, emits wrong URLs for custom tools, and `next-sitemap` (the spec's named tool) is unconfigured.
-- ⚠️ `generateStaticParams` present, but `[slug]` is not `dynamic = 'error'`/`dynamicParams=false`, so unknown/custom slugs still render at runtime.
+- ✅ Interactive tools receive the same generated metadata, SEO content, FAQs, related tools, and JSON-LD through the shared template.
+- ✅ `sitemap.ts` emits canonical URLs for all tools. It uses the supported App Router sitemap convention instead of the optional `next-sitemap` package.
+- ✅ `generateStaticParams` covers all registered tools and `dynamicParams = false` rejects unknown slugs.
 - ⚠️ Content depth: most FAQs are 3 hand-written + 4 boilerplate. Spec wants 5–8 genuine Q&A and "unique, non-thin content for at least 30 tool pages" (use-cases section missing entirely).
 
 ### 3.4 Accounts, pricing & API

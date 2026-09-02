@@ -11,17 +11,39 @@ import { ProgressBar } from "@/components/tools/ProgressBar";
 import { Download, RotateCcw } from "lucide-react";
 import { useConversionStore } from "@/store/conversionStore";
 import { SERVER_FALLBACK_IMAGE_SIZE_BYTES } from "@/lib/converters/client/thresholds";
+import type { Accept } from "react-dropzone";
 
 interface ToolConverterPanelProps {
   toolName: string;
   converterFn: string;
   batchMode?: boolean;
   operation?: "convert" | "compress" | "tool";
+  fromFormat?: string;
   toFormat?: string;
   category?: string;
 }
 
 const SERVER_IMAGE_TARGETS = new Set(["jpg", "jpeg", "png", "webp", "svg"]);
+
+const FORMAT_ACCEPT: Record<string, Accept> = {
+  pdf: { "application/pdf": [".pdf"] },
+  image: { "image/*": [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".heic", ".heif", ".svg", ".jfif", ".apng"] },
+  video: { "video/*": [".mp4", ".mov", ".webm", ".avi", ".mkv", ".mpeg", ".mpg"] },
+  audio: { "audio/*": [".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac", ".wma"] },
+};
+
+function acceptedFileTypes(fromFormat?: string): Accept | undefined {
+  if (!fromFormat || fromFormat === "*") return undefined;
+  const format = fromFormat.toLowerCase();
+  if (FORMAT_ACCEPT[format]) return FORMAT_ACCEPT[format];
+  if (["jpg", "jpeg", "jfif"].includes(format)) return { "image/jpeg": [`.${format}`] };
+  if (["png", "apng"].includes(format)) return { "image/png": [`.${format}`] };
+  if (["heic", "heif"].includes(format)) return { "image/heic": [".heic", ".heif"] };
+  if (["webp", "gif", "svg", "bmp", "tiff"].includes(format)) return { [`image/${format === "svg" ? "svg+xml" : format}`]: [`.${format}`] };
+  if (["mp4", "mov", "webm", "avi"].includes(format)) return { [`video/${format === "mov" ? "quicktime" : format}`]: [`.${format}`] };
+  if (["mp3", "wav", "ogg"].includes(format)) return { [`audio/${format === "mp3" ? "mpeg" : format}`]: [`.${format}`] };
+  return undefined;
+}
 
 /**
  * Large images are slow and memory-hungry to convert with Canvas in the
@@ -41,7 +63,9 @@ async function convertLargeImageOnServer(
   body.append("file", file);
 
   if (operation === "compress") {
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const requested = (toFormat || "").toLowerCase();
+    if (!["jpg", "jpeg", "png", "webp"].includes(requested)) return null;
+    const ext = requested === "jpeg" ? "jpg" : requested;
     body.append("output", ext);
     body.append("quality", "80");
     const res = await fetch("/api/compress/image", { method: "POST", body });
@@ -65,7 +89,7 @@ interface ResultFile {
   filename: string;
 }
 
-export function ToolConverterPanel({ toolName, converterFn, batchMode = false, operation, toFormat, category }: ToolConverterPanelProps) {
+export function ToolConverterPanel({ toolName, converterFn, batchMode = false, operation, fromFormat, toFormat, category }: ToolConverterPanelProps) {
   const [uploaded, setUploaded] = useState<UploadZoneFile[]>([]);
   const [statusFiles, setStatusFiles] = useState<FileStatusItem[]>([]);
   const [results, setResults] = useState<ResultFile[]>([]);
@@ -189,10 +213,10 @@ export function ToolConverterPanel({ toolName, converterFn, batchMode = false, o
 
   return (
     <div className="flex flex-col gap-4">
-      <UploadZone key={uploadSession} maxFiles={20} maxSizeMB={100} onFilesChange={setUploaded} />
+      <UploadZone key={uploadSession} accept={acceptedFileTypes(fromFormat)} maxFiles={20} maxSizeMB={100} onFilesChange={setUploaded} />
 
       <Button onClick={handleConvert} disabled={uploaded.length === 0 || isConverting}>
-        {isConverting ? "Processing…" : toolName}
+        {isConverting ? "Processing…" : operation === "compress" ? `Compress ${fromFormat ?? "file"}` : operation === "convert" ? `Convert to ${toFormat ?? "output"}` : toolName}
       </Button>
 
       {statusFiles.length > 1 && (

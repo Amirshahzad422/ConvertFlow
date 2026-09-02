@@ -94,6 +94,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
             converterFn={tool.converterFn}
             batchMode={tool.batchMode}
             operation={tool.operation}
+            fromFormat={tool.fromFormat}
             toFormat={tool.toFormat}
             category={tool.category}
           />

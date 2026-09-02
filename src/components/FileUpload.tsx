@@ -62,10 +62,7 @@ export default function FileUpload({
   } = useFileUpload({
     ...hookOptions,
     onFileSelect: (file) => {
-      console.log('[FileUpload] onFileSelect called with:', file?.name);
       setSelectedFile(file);
-      console.log('[FileUpload] selectedFile state set to:', file?.name);
-      console.log('[FileUpload] onFileChange ->', file?.name);
       onFileChange?.(file);
       clearError();
     }
@@ -76,7 +73,6 @@ export default function FileUpload({
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
-    console.log('[FileUpload] remove file');
     onFileChange?.(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -172,7 +168,6 @@ export default function FileUpload({
   }
 
   // Show file selected state with action button
-  console.log('[FileUpload] Render check - selectedFile:', selectedFile?.name, 'actionButtonText:', actionButtonText, 'onAction:', !!onAction);
   if (selectedFile && actionButtonText && onAction) {
     return (
       <div className={`space-y-4 relative z-10 bg-transparent ${boxed ? '' : className}`}>
@@ -257,8 +252,6 @@ export default function FileUpload({
                 type="file"
                 ref={fileInputRef}
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  console.log('[FileUpload] native <input> onChange file:', f?.name);
                   handleFileInputChange(e);
                 }}
                 className="sr-only"
@@ -298,7 +291,6 @@ export default function FileUpload({
                     key={source.id}
                     onClick={(e) => { 
                       e.stopPropagation(); 
-                      console.log('[FileUpload] Dropdown option clicked:', source.label);
                       if (source.id === 'device') {
                         // Ensure file dialog opens without being interrupted
                         const inputEl = fileInputRef.current;

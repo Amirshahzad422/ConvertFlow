@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const allowedFormats = ["jpg", "jpeg", "png", "webp", "svg"] as const;
 type AllowedFormat = typeof allowedFormats[number];
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
 export async function POST(req: Request) {
   try {
@@ -16,6 +17,12 @@ export async function POST(req: Request) {
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json({ error: "File exceeds the 100MB limit" }, { status: 413 });
+    }
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json({ error: "Unsupported file type" }, { status: 415 });
     }
     if (!allowedFormats.includes(target)) {
       return NextResponse.json({ error: "Unsupported target format" }, { status: 400 });

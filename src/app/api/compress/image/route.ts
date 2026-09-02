@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
 type Output = "jpg" | "jpeg" | "png" | "webp";
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+const allowedOutputs = new Set<Output>(["jpg", "jpeg", "png", "webp"]);
 
 export async function GET() {
   return NextResponse.json({
@@ -30,8 +32,14 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json({ error: "File exceeds the 100MB limit" }, { status: 413 });
+    }
     if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+      return NextResponse.json({ error: "Unsupported file type" }, { status: 415 });
+    }
+    if (!allowedOutputs.has(output)) {
+      return NextResponse.json({ error: "Unsupported output format" }, { status: 400 });
     }
 
     const inputBuffer = Buffer.from(await file.arrayBuffer());
